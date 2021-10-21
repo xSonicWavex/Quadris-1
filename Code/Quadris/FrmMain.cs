@@ -22,6 +22,8 @@ namespace Quadris {
 
     private void FrmMain_Load(object sender, EventArgs e) {
       board = new Board();
+      Piece piece = Piece.MakePiece(PieceType.I);
+      board.ActivePiece = piece;
       CreateGrid();
     }
 

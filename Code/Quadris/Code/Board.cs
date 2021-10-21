@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace Quadris {
   public class Board {
+    // TODO: add non-display buffer to top 4 rows
+    // TODO: change bool to int
+    // TODO: on rotate, recalculate detection pieces
+
     public bool[,] Grid { get; private set; }
-    private Piece activePiece;
+    public Piece ActivePiece { get; set; }
 
     private int cr;
     private int cc;
@@ -16,21 +20,26 @@ namespace Quadris {
       Grid = new bool[20, 10];
       cr = 0;
       cc = 0;
-      Grid[cr, cc] = true;
+      Grid[8, 3] = true;
     }
 
     public void Update() {
-      Grid[cr, cc] = false;
-      cc++;
-      if (cc >= Grid.GetLength(1)) {
-        cr++;
-        cc = 0;
-        if (cr >= Grid.GetLength(0)) {
-          cr = 0;
-          cc = 0;
+      bool[,] activePieceLayout = ActivePiece.layout;
+      for (int r = 0; r < activePieceLayout.GetLength(0); r++) {
+        for (int c = 0; c < activePieceLayout.GetLength(1); c++) {
+          if (activePieceLayout[r, c]) {
+            Grid[r + ActivePiece.gridRow, c + ActivePiece.gridCol] = false;
+          }
         }
       }
-      Grid[cr, cc] = true;
+      ActivePiece.MoveDown();
+      for (int r = 0; r < activePieceLayout.GetLength(0); r++) {
+        for (int c = 0; c < activePieceLayout.GetLength(1); c++) {
+          if (activePieceLayout[r, c]) {
+            Grid[r + ActivePiece.gridRow, c + ActivePiece.gridCol] = true;
+          }
+        }
+      }
     }
   }
 }
