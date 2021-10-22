@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Quadris.Properties;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Media;
 using System.Windows.Forms;
 
 namespace Quadris {
@@ -10,11 +13,26 @@ namespace Quadris {
     private const int CELL_WIDTH = 20;
     private const int CELL_HEIGHT = 20;
 
-    private static readonly Color EMPTY_CELL_COLOR = Color.FromArgb(0, 0, 255);
-    private static readonly Color FILLED_CELL_COLOR = Color.FromArgb(200, 200, 200);
-
     private Label[,] gridControls;
     private Board board;
+
+    private SoundPlayer sndPlayer;
+
+    private static readonly Dictionary<PieceColor, Image> pieceColorToImgMap = new Dictionary<PieceColor, Image> {
+      {PieceColor.BLUE, Resources.cell_blue},
+      {PieceColor.CYAN, Resources.cell_cyan},
+      {PieceColor.GREEN, Resources.cell_green},
+      {PieceColor.MAGENTA, Resources.cell_magenta},
+      {PieceColor.ORANGE, Resources.cell_orange},
+      {PieceColor.PURPLE, Resources.cell_purple},
+      {PieceColor.RED, Resources.cell_red},
+      {PieceColor.WHITE, Resources.cell_white},
+      {PieceColor.YELLOW, Resources.cell_yellow},
+      {PieceColor.FIRE, Resources.cell_fire},
+      {PieceColor.ICE, Resources.cell_ice},
+      {PieceColor.GROUND, Resources.cell_ground},
+      {PieceColor.DARK, Resources.cell_dark},
+    };
 
     public FrmMain() {
       InitializeComponent();
@@ -22,14 +40,16 @@ namespace Quadris {
 
     private void FrmMain_Load(object sender, EventArgs e) {
       board = new Board();
-      Piece piece = Piece.MakePiece(PieceType.I);
+      Piece piece = Piece.GetRandPiece();
       board.ActivePiece = piece;
       CreateGrid();
+      sndPlayer = new SoundPlayer(Resources.bg_music);
+      sndPlayer.PlayLooping();
     }
 
     private void CreateGrid() {
-      panBoard.Width = CELL_WIDTH * BOARD_COLS;
-      panBoard.Height = CELL_HEIGHT * BOARD_ROWS;
+      panBoard.Width = CELL_WIDTH * BOARD_COLS + 4;
+      panBoard.Height = CELL_HEIGHT * BOARD_ROWS + 4;
       gridControls = new Label[BOARD_ROWS, BOARD_COLS];
       panBoard.Controls.Clear();
       for (int col = 0; col < BOARD_COLS; col++) {
@@ -44,11 +64,12 @@ namespace Quadris {
     private void UpdateGrid() {
       for (int col = 0; col < BOARD_COLS; col++) {
         for (int row = 0; row < BOARD_ROWS; row++) {
-          if (board.Grid[row, col]) {
-            gridControls[row, col].BackColor = FILLED_CELL_COLOR;
+          GridCellInfo cellInfo = board.Grid[row + 4, col];
+          if (cellInfo.State == CellState.OCCUPIED_ACTIVE_PIECE || cellInfo.State == CellState.OCCUPIED_PREVIOUSLY) {
+            gridControls[row, col].Image = pieceColorToImgMap[cellInfo.Color];
           }
           else {
-            gridControls[row, col].BackColor = EMPTY_CELL_COLOR;
+            gridControls[row, col].Image = null;
           }
         }
       }
@@ -57,7 +78,6 @@ namespace Quadris {
     private Label MakeGridCell(int row, int col) {
       return new Label() {
         Text = "",
-        BackColor = (board.Grid[row, col] ? FILLED_CELL_COLOR : EMPTY_CELL_COLOR),
         Width = CELL_WIDTH,
         Height = CELL_HEIGHT,
         FlatStyle = FlatStyle.Flat,
@@ -69,6 +89,13 @@ namespace Quadris {
     private void tmrFps_Tick(object sender, EventArgs e) {
       board.Update();
       UpdateGrid();
+    }
+
+    private void FrmMain_KeyDown(object sender, KeyEventArgs e) {
+      if (e.KeyCode == Keys.Space) {
+        Piece piece = Piece.GetRandPiece();
+        board.ActivePiece = piece;
+      }
     }
   }
 }

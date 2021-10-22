@@ -1,34 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Quadris {
+  public enum CellState {
+    EMPTY,
+    OCCUPIED_PREVIOUSLY,
+    OCCUPIED_ACTIVE_PIECE,
+    COLLISION
+  }
 
-namespace Quadris {
+  public class GridCellInfo {
+    public PieceColor Color { get; set; }
+    public CellState State { get; set; }
+
+    public GridCellInfo() {
+      Reset();
+    }
+
+    public void Reset() {
+      Color = PieceColor.NONE;
+      State = CellState.EMPTY;
+    }
+  }
+
   public class Board {
-    // TODO: add non-display buffer to top 4 rows
-    // TODO: change bool to int
     // TODO: on rotate, recalculate detection pieces
 
-    public bool[,] Grid { get; private set; }
+    public GridCellInfo[,] Grid { get; private set; }
     public Piece ActivePiece { get; set; }
 
-    private int cr;
-    private int cc;
-
     public Board() {
-      Grid = new bool[20, 10];
-      cr = 0;
-      cc = 0;
-      Grid[8, 3] = true;
+      Grid = new GridCellInfo[24, 10];
+      for (int i = 0; i < Grid.GetLength(0); i++) {
+        for (int j = 0; j < Grid.GetLength(1); j++) {
+          Grid[i, j] = new GridCellInfo();
+        }
+      }
     }
 
     public void Update() {
-      bool[,] activePieceLayout = ActivePiece.layout;
+      bool[,] activePieceLayout = ActivePiece.Layout;
+      int centerCol = Grid.GetLength(1) / 2 - activePieceLayout.GetLength(1) / 2;
       for (int r = 0; r < activePieceLayout.GetLength(0); r++) {
         for (int c = 0; c < activePieceLayout.GetLength(1); c++) {
           if (activePieceLayout[r, c]) {
-            Grid[r + ActivePiece.gridRow, c + ActivePiece.gridCol] = false;
+            Grid[r + ActivePiece.GridRow, c + ActivePiece.GridCol + centerCol].Reset();
           }
         }
       }
@@ -36,7 +49,9 @@ namespace Quadris {
       for (int r = 0; r < activePieceLayout.GetLength(0); r++) {
         for (int c = 0; c < activePieceLayout.GetLength(1); c++) {
           if (activePieceLayout[r, c]) {
-            Grid[r + ActivePiece.gridRow, c + ActivePiece.gridCol] = true;
+            GridCellInfo cellInfo = Grid[r + ActivePiece.GridRow, c + ActivePiece.GridCol + centerCol];
+            cellInfo.State = CellState.OCCUPIED_ACTIVE_PIECE;
+            cellInfo.Color = ActivePiece.Color;
           }
         }
       }
