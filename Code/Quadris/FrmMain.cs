@@ -96,6 +96,18 @@ namespace Quadris {
         Piece piece = Piece.GetRandPiece();
         board.ActivePiece = piece;
       }
+      else if (e.KeyCode == Keys.X) {
+        board.RotateActivePieceRight();
+      }
+      else if (e.KeyCode == Keys.Z) {
+        board.RotateActivePieceLeft();
+      }
+      else if (e.KeyCode == Keys.Right) {
+        board.MoveActivePieceRight();
+      }
+      else if (e.KeyCode == Keys.Left) {
+        board.MoveActivePieceLeft();
+      }
     }
   }
 }
