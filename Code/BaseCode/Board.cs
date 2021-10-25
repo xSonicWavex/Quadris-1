@@ -1,4 +1,5 @@
-﻿namespace Quadris {
+﻿#pragma warning disable 1591
+namespace Quadris {
   public enum CellState {
     EMPTY,
     OCCUPIED_PREVIOUSLY,
@@ -44,6 +45,9 @@
       }
     }
 
+    /// <summary>
+    /// This method updates the grid and moves the active piece down
+    /// </summary>
     public void Update() {
       if (ActivePieceCanMove(MoveDir.DOWN)) {
         ActivePiece.MoveDown();
@@ -51,6 +55,7 @@
       }
       else {
         SettlePiece();
+        CheckForLine();
       }
     }
 
@@ -73,6 +78,12 @@
       }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="row">the row</param>
+    /// <param name="col">the column</param>
+    /// <returns>A GridCellInfo object</returns>
     public GridCellInfo GetCellInfo(int row, int col) {
       if (row < 0 || row >= Grid.GetLength(0) || col < 0 || col >= Grid.GetLength(1))
         return null;
@@ -96,14 +107,14 @@
 
     public void RotateActivePieceRight() {
       ActivePiece.RotateRight();
-      if (CheckForCollisions()) {
+      if (CheckForOutOfBounds()) {
         ActivePiece.RotateLeft();
       }
     }
 
     public void RotateActivePieceLeft() {
       ActivePiece.RotateLeft();
-      if (CheckForCollisions()) {
+      if (CheckForOutOfBounds()) {
         ActivePiece.RotateRight();
       }
     }
@@ -172,7 +183,7 @@
       return canMove;
     }
 
-    private bool CheckForCollisions() {
+    private bool CheckForOutOfBounds() {
       for (int r = 0; r < ActivePiece.Layout.GetLength(0); r++) {
         for (int c = 0; c < ActivePiece.Layout.GetLength(1); c++) {
           if (ActivePiece.Layout[r, c]) {
@@ -196,6 +207,26 @@
         }
       }
       ActivePiece = Piece.GetRandPiece();
+    }
+
+    public void CheckForLine() {
+      for (int curRow = 0; curRow < Grid.GetLength(0); curRow++) {
+        bool allFilled = true;
+        for (int col = 0; col < Grid.GetLength(1); col++) {
+          if (GetCellInfo(curRow, col)?.State == CellState.EMPTY) {
+            allFilled = false;
+            break;
+          }
+        }
+        if (allFilled) {
+          for (int col = 0; col < Grid.GetLength(1); col++) {
+            for (int dropRow = curRow; dropRow > 0; dropRow--) {
+              Grid[dropRow, col] = Grid[dropRow - 1, col];
+            }
+          }
+          curRow--;
+        }
+      }
     }
   }
 }

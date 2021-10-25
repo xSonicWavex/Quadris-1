@@ -92,21 +92,19 @@ namespace Quadris {
     }
 
     private void FrmMain_KeyDown(object sender, KeyEventArgs e) {
-      if (e.KeyCode == Keys.Space) {
-        Piece piece = Piece.GetRandPiece();
-        board.ActivePiece = piece;
-      }
-      else if (e.KeyCode == Keys.X) {
-        board.RotateActivePieceRight();
-      }
-      else if (e.KeyCode == Keys.Z) {
-        board.RotateActivePieceLeft();
-      }
-      else if (e.KeyCode == Keys.Right) {
-        board.MoveActivePieceRight();
-      }
-      else if (e.KeyCode == Keys.Left) {
-        board.MoveActivePieceLeft();
+      switch (e.KeyCode) {
+        case Keys.X:
+          board.RotateActivePieceRight();
+          break;
+        case Keys.Z:
+          board.RotateActivePieceLeft();
+          break;
+        case Keys.Right:
+          board.MoveActivePieceRight();
+          break;
+        case Keys.Left:
+          board.MoveActivePieceLeft();
+          break;
       }
     }
   }
